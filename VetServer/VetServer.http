@@ -1,0 +1,6 @@
+@VetServer_HostAddress = http://localhost:5002
+
+GET {{VetServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
