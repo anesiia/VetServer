@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using VetServer.Data;
 using VetServer.DTO;
 using VetServer.Models;
+using VetServer.Models.Database;
 
 namespace VetServer.Controllers
 {
@@ -23,25 +24,50 @@ namespace VetServer.Controllers
             _logger = logger; // ?? throw new ArgumentNullException(nameof(logger));
         }
 
-
+        // POST: /register
         [HttpPost("register")]
-        public async Task<ActionResult> RegisterUser(Owners owner)
+        public async Task<ActionResult> Register(OwnerRegistration model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                if (await _context.Owners.AnyAsync(ow => ow.OwnerEmail == model.Email))
+                {
+                    return BadRequest("Doctor with such email already exists");
+                }
+
+                var newOwner = new Owners
+                {
+                    OwnerName = model.Name,
+                    OwnerEmail = model.Email,
+                    OwnerPhone = model.Phone,
+                };
+
+                newOwner.OwnerPassHash = _passwordHasher.HashPassword(newOwner, model.Password);
+
+                await _context.Owners.AddAsync(newOwner);
+                await _context.SaveChangesAsync();
+
+                return Ok("New pet owner registration was successful");
+
+                /*
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState); 
                     
 
                 }
-                var hashedPassword = _passwordHasher.HashPassword(owner, owner.OwnerPassHash);
-                owner.OwnerPassHash = hashedPassword;
+                var hashedPassword = _passwordHasher.HashPassword(model, model.Password);
+                model.Password = hashedPassword;
 
-                _context.Owners.Add(owner);
+                _context.Owners.Add(model);
                 await _context.SaveChangesAsync();
 
-                return Ok("User registration successful");
+                return Ok("User registration successful");*/
 
             }
             catch (Exception ex)
@@ -51,7 +77,7 @@ namespace VetServer.Controllers
             }
         }
 
-
+        // POST: /login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] OwnerLoginModel model)
         {
@@ -62,21 +88,21 @@ namespace VetServer.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var user = await _context.Owners.FirstOrDefaultAsync(ow => ow.OwnerEmail == model.Email);
+                var owner = await _context.Owners.FirstOrDefaultAsync(ow => ow.OwnerEmail == model.Email);
 
-                if (user == null)
+                if (owner == null)
                 {
                     return BadRequest(ModelState);
                 }
 
-                var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.OwnerPassHash, model.Password);
+                var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(owner, owner.OwnerPassHash, model.Password);
 
                 if (passwordVerificationResult != PasswordVerificationResult.Success)
                 {
                     return BadRequest(ModelState);
                 }
 
-                return Ok(user);
+                return Ok(owner);
             }
             catch(Exception ex)
             {
@@ -85,37 +111,63 @@ namespace VetServer.Controllers
             }
         }
 
-        /*
-        // GET: api/<OwnersController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+
+        // PUT: update-personal-info/5
+        [HttpPut("update-personal-info/{id}")]
+        public async Task<IActionResult> UpdateOwnerInfo(EditOwner model)
         {
-            return new string[] { "value1", "value2" };
+            try
+            {
+                var owner = await _context.Owners.FindAsync(model.Id);
+                if (owner == null)
+                {
+                    return NotFound("There is no owner with the provided ID.");
+                }
+
+                owner.OwnerName = model.Name;
+                owner.OwnerPhone = model.Phone;
+
+                _context.Update(owner);
+                await _context.SaveChangesAsync();
+
+                return Ok("Personal pet-owner details updated successfully.");
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
-        // GET api/<OwnersController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // GET: /personal-info/5
+        [HttpGet("personal-info/{id}")]
+        public async Task<IActionResult> GetOwnerInfo(int id)
         {
-            return "value";
+            try
+            {
+                var owner = await _context.Owners.FindAsync(id);
+
+                if (owner == null)
+                {
+                    return NotFound("there is no owner");
+                }
+                var ownerDto = new OwnerDto
+                {
+                    OwnerId = owner.owner_id,
+                    OwnerName = owner.OwnerName,
+                    OwnerEmail = owner.OwnerEmail,
+                    OwnerPhone = owner.OwnerPhone
+                };
+
+                return Ok(ownerDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during appointment info loading");
+                return StatusCode(500, ex.Message);
+            }
+
         }
 
-        // POST api/<OwnersController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<OwnersController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<OwnersController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }*/
     }
 }

@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace VetServer.Models
+namespace VetServer.Models.Database
 {
     public class Cages
     {
-        [Key] 
+        [Key]
         [Column("cage_id")]
         public int CageId { get; set; }
 
-        [Column("cage_temperature")] 
+        [Column("cage_temperature")]
         public float CageTemperature { get; set; }
 
         [Column("cage_oxygen")]

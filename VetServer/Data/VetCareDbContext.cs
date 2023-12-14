@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VetServer.Models;
+using VetServer.Models.Database;
 
 namespace VetServer.Data
 {
@@ -16,8 +16,10 @@ namespace VetServer.Data
 
 
 
-        public DbSet<Doctors> DoctorLoginModel { get; set; }
-        public DbSet<Owners> OwnerLoginModel { get; set; }
+        //public DbSet<Doctors> DoctorLoginModel { get; set; }
+        //public DbSet<Owners> OwnerLoginModel { get; set; }
+        //public DbSet<Doctors> DoctorRegistration { get; set; }
+        //public DbSet<Owners> OwnerRegistration { get; set; }
 
 
     }

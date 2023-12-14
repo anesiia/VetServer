@@ -8,15 +8,15 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using VetServer.Data;
 using VetServer.DTO;
-using VetServer.Models;
+using VetServer.Models.Database;
 
-    //GetAppointmentInfo
-    //UpdateAppointmentInfo
-    //GetDoctorAppointmentsNextWeek
-    //GetDoctorAppointments
-    //GetOwnerAppointments
-    //GetPastOwnerAppointments
-    //GetFutureOwnerAppointments
+//GetAppointmentInfo
+//UpdateAppointmentInfo
+//GetDoctorAppointmentsNextWeek
+//GetDoctorAppointments
+//GetOwnerAppointments
+//GetPastOwnerAppointments
+//GetFutureOwnerAppointments
 
 namespace VetServer.Controllers
 {

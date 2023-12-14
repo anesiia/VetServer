@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using VetServer.Data;
 using VetServer.DTO;
 using VetServer.Models;
+using VetServer.Models.Database;
 
 namespace VetServer.Controllers
 {
@@ -25,21 +26,30 @@ namespace VetServer.Controllers
             _logger = logger;
         }
 
-        // GET: Drugs/GetDrugs
-        [HttpGet("GetDrugs")]
-        public IActionResult GetDrugs()
+        // GET: /all-drugs
+        [HttpGet("all-drugs")]
+        public async Task<IActionResult> GetDrugs()
         {
-            var drugs = _context.Drugs.Select(d => new DrugDto
+            try
             {
-                DrugId = d.DrugId,
-                DrugName = d.DrugName,
-                DrugQuantity = d.DrugQuantity
-            }).ToList();
-            return Ok(drugs);
+                var drugs = _context.Drugs.Select(d => new DrugDto
+                {
+                    DrugId = d.DrugId,
+                    DrugName = d.DrugName,
+                    DrugQuantity = d.DrugQuantity
+                }).ToList();
+                return Ok(drugs);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during all drugs loading");
+                return StatusCode(500, ex.Message);
+            }
+            
         }
 
-        // GET: Drugs/GetDrugInfo/5
-        [HttpGet("GetDrugInfo/{id}")]
+        // GET: Drugs/drug-details/5
+        [HttpGet("drug-details/{id}")]
         public async Task<IActionResult> GetDrugInfo(int id)
         {
             try
@@ -61,86 +71,99 @@ namespace VetServer.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred during drug loading info");
                 return StatusCode(500, ex.Message);
             }
 
         }
 
-        // PUT: Drugs/UpdateDrugAmount/5
-        [HttpPut("UpdateDrugAmount/{id}")]
-        public async Task<IActionResult> UpdateDrugAmount(int id, int amount)
+        // PUT: /update-drug-amount/5
+        [HttpPut("update-drug-amount/{id}")]
+        public async Task<IActionResult> UpdateDrugAmount(EditDrugAmount model)
         {
             try
             {
-                var drug= await _context.Drugs.FindAsync(id);
+                var drug = await _context.Drugs.FindAsync(model.Id);
                 if (drug == null)
                 {
                     return NotFound("There is no drug with the provided ID");
                 }
 
-                drug.DrugQuantity = amount;
+                drug.DrugQuantity = model.Quantity;
                 _context.Update(drug);
                 await _context.SaveChangesAsync();
 
-                return Ok($"{drug.DrugName} amount {amount} updated successfully");
+                return Ok($"Drug amount {drug.DrugQuantity} updated successfully");
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred during drug updating amount");
                 return StatusCode(500, ex.Message);
             }
         }
 
-        // POST: Drugs/AddDrug
-        [HttpPost("AddDrug")]
+        // POST: /add-new-drug
+        [HttpPost("add-new-drug")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddDrug([Bind("DrugName,DrugQuantity")] AddDrugs drugs)
+        public async Task<IActionResult> AddDrug(AddDrugs model)
         {
             try
             {
-                if (ModelState.IsValid)
+                if (!ModelState.IsValid)
                 {
-                    _context.Add(drugs);
-                    await _context.SaveChangesAsync();
-                    return Ok($"{drugs.DrugQuantity} - {drugs.DrugName} were added successfully");
+                    return BadRequest(ModelState);
                 }
-                return BadRequest(ModelState);
+
+                if (await _context.Drugs.AnyAsync(d => d.DrugName == model.Name))
+                {
+                    return BadRequest("Drug with such name already exists");
+                }
+
+                var newDrug= new Drugs
+                {
+                    DrugName = model.Name,
+                    DrugQuantity = model.Quantity
+                };
+
+                await _context.Drugs.AddAsync(newDrug);
+                await _context.SaveChangesAsync();
+
+                return Ok($"{newDrug.DrugQuantity} - {newDrug.DrugName} were added successfully");
+
             }
             catch (Exception ex)
-            { 
+            {
+                _logger.LogError(ex, "An error occurred during adding new drug");
                 return StatusCode(500, ex.Message);
            
             }
         }
 
-        // Delete: Drugs/DeleteDrug/5
-        [HttpDelete, ActionName("DeleteDrug")]
+        // Delete: /delete-drug/5
+        [HttpDelete, ActionName("delete-drug")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteDrug(int id)
         {
             try
             {
                 var drug = await _context.Drugs.FindAsync(id);
-                if (drug != null)
+                if (drug == null)
                 {
-                    _context.Drugs.Remove(drug);
-                    await _context.SaveChangesAsync();
-                    return Ok($"{drug.DrugName} was successfully deleted");
+                    return BadRequest(ModelState);                
                 }
+                _context.Drugs.Remove(drug);
+                await _context.SaveChangesAsync();
 
-                return BadRequest(ModelState);
+                return Ok($"{drug.DrugName} was successfully deleted");
+
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred during deleting drug");
                 return StatusCode(500, ex.Message);
 
             }
             
         }
-
-        /*
-        private bool DrugsExists(int id)
-        {
-            return _context.Drug.Any(e => e.DrugId == id);
-        }*/
     }
 }

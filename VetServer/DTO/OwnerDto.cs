@@ -9,7 +9,7 @@ namespace VetServer.DTO
 
         public string? OwnerName { get; set; }
 
-        public string? OwnerPhone { get; set; }
+        public decimal? OwnerPhone { get; set; }
 
         public string? OwnerEmail { get; set; }
 

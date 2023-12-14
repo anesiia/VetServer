@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace VetServer.Models
+namespace VetServer.Models.Database
 {
     public class Patients
     {
-        [Key] 
+        [Key]
         [Column("patient_id")]
         public int PatientId { get; set; }
 
-        [Column("patient_name")] 
+        [Column("patient_name")]
         public string PatientName { get; set; }
 
         [Column("patient_age")]

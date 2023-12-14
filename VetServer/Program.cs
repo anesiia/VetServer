@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Globalization;
 using VetServer.Data;
-using VetServer.Models;
+using VetServer.Models.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 

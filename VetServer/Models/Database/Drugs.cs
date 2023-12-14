@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace VetServer.Models
+namespace VetServer.Models.Database
 {
     public class Drugs
     {
-        [Key] 
+        [Key]
         [Column("drug_id")]
         public int DrugId { get; set; }
 

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using VetServer.Data;
 using VetServer.DTO;
 using VetServer.Models;
+using VetServer.Models.Database;
 
 
 namespace VetServer.Controllers;
