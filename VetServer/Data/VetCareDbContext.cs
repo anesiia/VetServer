@@ -12,6 +12,7 @@ namespace VetServer.Data
         public DbSet<Owners> Owners { get; set; }
         public DbSet<Drugs> Drugs { get; set; }
         public DbSet<Patients> Patients { get; set; }
+        public DbSet<Kinds> Kinds { get; set; }
         public DbSet<Cages> Cage { get; set; }
 
 

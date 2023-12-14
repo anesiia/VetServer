@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using VetServer.Data;
 using VetServer.DTO;
+using VetServer.Models;
 using VetServer.Models.Database;
 
 //GetAppointmentInfo
@@ -305,6 +307,34 @@ namespace VetServer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred during DELETING appointment");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("year-consultations-per-month")]
+        public IActionResult GetYearConsultationsPerMonth()
+        {
+            try
+            {
+                DateTime currentDate = DateTime.Now;
+                DateTime firstDayOfCurrentYear = new DateTime(currentDate.Year, 1, 1);
+
+                var consultationsPerMonth = _context.Appointments
+                    .Where(c => c.AppointmentDate >= firstDayOfCurrentYear)
+                    .GroupBy(c => new { c.AppointmentDate.Year, c.AppointmentDate.Month })
+                    .Select(group => new AppointmentsYearStatistics
+                    {
+                        Month = $"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(group.Key.Month)} {group.Key.Year}",
+                        ConsultationCount = group.Count()
+                    })
+                    .OrderBy(group => group.Month)
+                    .ToList();
+
+                return Ok(consultationsPerMonth);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching consultations per month");
                 return StatusCode(500, ex.Message);
             }
         }

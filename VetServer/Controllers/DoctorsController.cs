@@ -109,6 +109,56 @@ public class DoctorsController : ControllerBase
         }
     }
 
-    
+    [HttpGet("top-workers")]
+    public IActionResult GetDoctorsStatistic()
+    {
+        try
+        {
+            var doctorsAppointmentsAmout = _context.Doctors
+                .Select(doctor => new DoctorRating
+                {
+                    DoctorName = doctor.DoctorName,
+                    Count = _context.Appointments.Count(c => c.doctor_id == doctor.DoctorId)
+                })
+                .OrderByDescending(info => info.Count)
+                .ToList();
+
+            return Ok(doctorsAppointmentsAmout);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while loading top-workers");
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+    [HttpGet("top-workers-in-month")]
+    public IActionResult GetDoctorsStatisticByMonth()
+    {
+        try
+        {
+            DateTime currentDate = DateTime.Now;
+            DateTime firstDayOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+
+            // Фильтрация консультаций, проведенных за последний месяц
+            var doctorsAppointmentsAmout = _context.Doctors
+                .Select(doctor => new DoctorRating
+                {
+                    DoctorName = doctor.DoctorName,
+                    Count = _context.Appointments
+                        .Count(c => c.doctor_id == doctor.DoctorId && c.AppointmentDate >= firstDayOfMonth)
+                })
+                .OrderByDescending(info => info.Count)
+                .ToList();
+
+            return Ok(doctorsAppointmentsAmout);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while fetching doctor consultation info for the last month");
+            return StatusCode(500, ex.Message);
+        }
+    }
+
 
 }

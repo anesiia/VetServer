@@ -104,7 +104,6 @@ namespace VetServer.Controllers
 
         // POST: /add-new-drug
         [HttpPost("add-new-drug")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddDrug(AddDrugs model)
         {
             try
@@ -141,7 +140,6 @@ namespace VetServer.Controllers
 
         // Delete: /delete-drug/5
         [HttpDelete, ActionName("delete-drug")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteDrug(int id)
         {
             try
