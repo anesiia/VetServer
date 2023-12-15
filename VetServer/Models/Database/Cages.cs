@@ -10,13 +10,13 @@ namespace VetServer.Models.Database
         public int CageId { get; set; }
 
         [Column("cage_temperature")]
-        public float CageTemperature { get; set; }
+        public float? CageTemperature { get; set; }
 
         [Column("cage_oxygen")]
-        public float CageOxygen { get; set; }
+        public float? CageOxygen { get; set; }
 
-        [ForeignKey("PatientId")]
-        public int PatientId { get; set; }
+        [ForeignKey("patient_id")]
+        public int patient_id { get; set; }
 
     }
 }
