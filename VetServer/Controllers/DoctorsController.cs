@@ -25,6 +25,7 @@ public class DoctorsController : ControllerBase
         _passwordHasher = passwordHasher;
     }
 
+    // GET: /all-doctors
     [HttpGet("all-doctors")]
     public async Task<IActionResult> GetDoctors()
     {
@@ -38,8 +39,9 @@ public class DoctorsController : ControllerBase
         return Ok(doctors);
     }
 
-    [HttpPost("register")]
-    public async Task<ActionResult> DoctorRegister(DoctorRegistration model)
+    // POST: /register
+    [HttpPost("add-new-doctor")]
+    public async Task<ActionResult> AddDoctor(DoctorRegistration model)
     {
         try
         {
@@ -76,6 +78,7 @@ public class DoctorsController : ControllerBase
         }
     }
 
+    // POST: /login
     [HttpPost("login")]
     public async Task<IActionResult> DoctorLogin([FromBody] DoctorLoginModel model)
     {
@@ -109,7 +112,59 @@ public class DoctorsController : ControllerBase
         }
     }
 
-    
+    // DELETE: /delete-doctor/5
+    [HttpDelete("delete-doctor/{id}")]
+    public IActionResult DeleteDoctor(int id)
+    {
+        try
+        {
+            var doctorToDelete = _context.Doctors.Find(id);
 
+            if (doctorToDelete == null)
+            {
+                return NotFound($"Doctor with ID {id} not found");
+            }
+
+            _context.Doctors.Remove(doctorToDelete);
+            _context.SaveChanges();
+
+            return Ok($"Doctor with ID {id} deleted successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"An error occurred while deleting doctor with ID {id}");
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+    // PUT: /update-doctor-info/5
+    [HttpPut("update-doctor-info/{id}")]
+    public IActionResult UpdateDoctor(int id, [FromBody] EditDoctor model)
+    {
+        try
+        {
+            var doctorToUpdate = _context.Doctors.Find(id);
+
+            if (doctorToUpdate == null)
+            {
+                return NotFound($"Doctor with ID {id} not found");
+            }
+
+            doctorToUpdate.DoctorName = model.Name;
+            doctorToUpdate.DoctorEmail = model.Email;
+            doctorToUpdate.DoctorPhone = model.Phone;
+            doctorToUpdate.DoctorAddress = model.Address;
+            doctorToUpdate.IsAdmin = model.IsAdmin;
+
+            _context.SaveChanges();
+
+            return Ok($"Doctor with ID {id} updated successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"An error occurred while updating doctor with ID {id}");
+            return StatusCode(500, ex.Message);
+        }
+    }
 
 }
