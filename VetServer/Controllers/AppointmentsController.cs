@@ -71,7 +71,7 @@ namespace VetServer.Controllers
             }
             
         }
-
+        /*
 
         [HttpPut("update-appointment/{id}")]
         public async Task<IActionResult> UpdateAppointmentInfo(int id, string diagnose, string info)
@@ -86,6 +86,32 @@ namespace VetServer.Controllers
 
                 appointment.AppointmentDiagnose = diagnose;
                 appointment.AppointmentInfo = info;
+
+                _context.Update(appointment);
+                await _context.SaveChangesAsync();
+
+                return Ok("Visit details updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during appointment updating");
+                return StatusCode(500, ex.Message);
+            }
+        }*/
+
+        [HttpPut("update-appointment/{id}")]
+        public async Task<IActionResult> UpdateAppointmentInfo(EditAppointment model)
+        {
+            try
+            {
+                var appointment = await _context.Appointments.FindAsync(model.Id);
+                if (appointment == null)
+                {
+                    return NotFound("There is no visit with the provided ID.");
+                }
+
+                appointment.AppointmentDiagnose = model.Diagnose;
+                appointment.AppointmentInfo = model.Info;
 
                 _context.Update(appointment);
                 await _context.SaveChangesAsync();
@@ -139,6 +165,7 @@ namespace VetServer.Controllers
             {
                 var doctorSchedule = _context.Appointments
                     .Where(s => s.doctor_id == doctorId)
+                    .OrderBy(s => s.AppointmentDate)
                     .Select(s => new AppointmentDto
                     {
                         AppointmentId = s.AppointmentId,
@@ -156,6 +183,27 @@ namespace VetServer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred during doctor summary schedule loading");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        // GET: api/Appointments/doctor-appointments-time/{doctorId}/{date}
+        [HttpGet("doctor-appointments-time/{doctorId}/{date}")]
+        public IActionResult GetDoctorAppointmentsTimeForDate(int doctorId, DateTime date)
+        {
+            try
+            {
+                // Получаем все времена консультаций для доктора на указанную дату
+                var doctorAppointmentsTime = _context.Appointments
+                    .Where(a => a.doctor_id == doctorId && a.AppointmentDate.Date == date.Date)
+                    .Select(a => a.AppointmentTime)
+                    .ToList();
+
+                return Ok(doctorAppointmentsTime);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching doctor appointment times for the date");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -312,6 +360,14 @@ namespace VetServer.Controllers
         }
 
         
+
+
+
+
+
+
+
+
 
     }
 }

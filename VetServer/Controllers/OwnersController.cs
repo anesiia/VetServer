@@ -24,7 +24,7 @@ namespace VetServer.Controllers
             _logger = logger; // ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        // POST: /register
+        // POST: /api/Owners/register
         [HttpPost("register")]
         public async Task<ActionResult> Register(OwnerRegistration model)
         {
@@ -62,7 +62,7 @@ namespace VetServer.Controllers
             }
         }
 
-        // POST: /login
+        // POST: /api/Owners/login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] OwnerLoginModel model)
         {
@@ -96,35 +96,27 @@ namespace VetServer.Controllers
             }
         }
 
-
-        // PUT: update-personal-info/5
-        [HttpPut("update-personal-info/{id}")]
-        public async Task<IActionResult> UpdateOwnerInfo(EditOwner model)
+        // GET: /api/Owners/owner-animals/5
+        [HttpGet("owner-animals/{ownerId}")]
+        public IActionResult GetOwnerAnimals(int ownerId)
         {
             try
             {
-                var owner = await _context.Owners.FindAsync(model.Id);
-                if (owner == null)
-                {
-                    return NotFound("There is no owner with the provided ID.");
-                }
+                // Отримуємо всіх тварини для власника з вказаним ідентифікатором
+                var ownerAnimals = _context.Patients
+                    .Where(a => a.owner_id == ownerId)
+                    .ToList();
 
-                owner.OwnerName = model.Name;
-                owner.OwnerPhone = model.Phone;
-
-                _context.Update(owner);
-                await _context.SaveChangesAsync();
-
-                return Ok("Personal pet-owner details updated successfully.");
-
+                return Ok(ownerAnimals);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred while fetching owner animals");
                 return StatusCode(500, ex.Message);
             }
         }
 
-        // GET: /personal-info/5
+        // GET: /api/Owners/personal-info/5
         [HttpGet("personal-info/{id}")]
         public async Task<IActionResult> GetOwnerInfo(int id)
         {
@@ -153,6 +145,37 @@ namespace VetServer.Controllers
             }
 
         }
+
+        // PUT: /api/Owners/update-personal-info/5
+        [HttpPut("update-personal-info/{id}")]
+        public async Task<IActionResult> UpdateOwnerInfo(EditOwner model)
+        {
+            try
+            {
+                var owner = await _context.Owners.FindAsync(model.Id);
+                if (owner == null)
+                {
+                    return NotFound("There is no owner with the provided ID.");
+                }
+
+                owner.OwnerName = model.Name;
+                owner.OwnerPhone = model.Phone;
+
+                _context.Update(owner);
+                await _context.SaveChangesAsync();
+
+                return Ok("Personal pet-owner details updated successfully.");
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        
+
+
 
     }
 }

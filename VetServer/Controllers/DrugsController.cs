@@ -139,7 +139,7 @@ namespace VetServer.Controllers
         }
 
         // Delete: /delete-drug/5
-        [HttpDelete, ActionName("delete-drug")]
+        [HttpDelete("delete-drug/{id}")]
         public async Task<IActionResult> DeleteDrug(int id)
         {
             try

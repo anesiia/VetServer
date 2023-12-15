@@ -29,7 +29,9 @@ public class DoctorsController : ControllerBase
     [HttpGet("all-doctors")]
     public async Task<IActionResult> GetDoctors()
     {
-        var doctors = _context.Doctors.Select(d => new DoctorDto
+        var doctors = _context.Doctors
+            .OrderBy(d => d.DoctorName)
+            .Select(d => new DoctorDto
         {
             DoctorId = d.DoctorId,
             DoctorName = d.DoctorName,
