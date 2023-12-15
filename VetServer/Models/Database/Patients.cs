@@ -21,8 +21,8 @@ namespace VetServer.Models.Database
         [ForeignKey("owner_id")]
         public int owner_id { get; set; }
 
-        [ForeignKey("KindId")]
-        public int KindId { get; set; }
+        [ForeignKey("kind_id")]
+        public int kind_id { get; set; }
 
     }
 }

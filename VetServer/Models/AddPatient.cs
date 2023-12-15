@@ -18,6 +18,6 @@ namespace VetServer.Models
         public int owner_id { get; set; }
 
         [Required]
-        public int KindId { get; set; }
+        public int kind_id { get; set; }
     }
 }

@@ -10,6 +10,6 @@ namespace VetServer.DTO
         public int PatientAge { get; set; }
         public string PatientSex { get; set; }
         public int owner_id { get; set; }
-        public int KindId { get; set; }
+        public int kind_id { get; set; }
     }
 }

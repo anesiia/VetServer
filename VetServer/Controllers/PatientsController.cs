@@ -22,9 +22,9 @@ namespace VetServer.Controllers
             _logger = logger;
         }
 
-        // GET: /popular-animal-types
-        [HttpGet("popular-animal-types")]
-        public IActionResult GetPopularAnimalTypes()
+        // GET: /popular-animal-kinds
+        [HttpGet("popular-animal-kinds")]
+        public IActionResult GetPopularAnimalKinds()
         {
             try
             {
@@ -32,7 +32,7 @@ namespace VetServer.Controllers
                     .Select(type => new KindRating
                     {
                         Name = type.KindName,
-                        Count = _context.Patients.Count(p => p.KindId == type.KindId)
+                        Count = _context.Patients.Count(p => p.kind_id == type.kind_id)
                     })
                     .OrderByDescending(info => info.Count)
                     .ToList();
@@ -63,7 +63,7 @@ namespace VetServer.Controllers
                     return BadRequest("Owner with the specified ID does not exist");
                 }
 
-                var animalTypeExists = _context.Kinds.Any(type => type.KindId == model.KindId);
+                var animalTypeExists = _context.Kinds.Any(type => type.kind_id == model.kind_id);
                 if (!animalTypeExists)
                 {
                     return BadRequest("Animal type with the specified ID does not exist");
@@ -74,7 +74,7 @@ namespace VetServer.Controllers
                 {
                     PatientName = model.Name,
                     owner_id = model.owner_id,
-                    KindId = model.KindId,
+                    kind_id = model.kind_id, 
                     PatientAge = model.Age,
                     PatientSex = model.Sex
                 };

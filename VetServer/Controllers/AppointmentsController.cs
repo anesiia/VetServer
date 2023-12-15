@@ -320,7 +320,7 @@ namespace VetServer.Controllers
                 DateTime firstDayOfCurrentYear = new DateTime(currentDate.Year, 1, 1);
 
                 var consultationsPerMonth = _context.Appointments
-                    .Where(c => c.AppointmentDate >= firstDayOfCurrentYear)
+                    .Where(c => c.AppointmentDate >= firstDayOfCurrentYear).AsEnumerable()
                     .GroupBy(c => new { c.AppointmentDate.Year, c.AppointmentDate.Month })
                     .Select(group => new AppointmentsYearStatistics
                     {
