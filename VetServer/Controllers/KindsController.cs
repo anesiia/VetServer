@@ -30,7 +30,7 @@ namespace VetServer.Controllers
             {
                 var kinds = _context.Kinds.Select(k => new KindDto
                 {
-                    KindId = k.kind_id,
+                    kind_id = k.kind_id,
                     KindName = k.KindName
                 }).ToList();
                 return Ok(kinds);

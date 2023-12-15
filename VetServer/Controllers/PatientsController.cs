@@ -5,8 +5,6 @@ using VetServer.DTO;
 using VetServer.Models;
 using VetServer.Models.Database;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace VetServer.Controllers
 {
     [Route("api/[controller]")]
@@ -20,30 +18,6 @@ namespace VetServer.Controllers
         {
             _context = context;
             _logger = logger;
-        }
-
-        // GET: /popular-animal-kinds
-        [HttpGet("popular-animal-kinds")]
-        public IActionResult GetPopularAnimalKinds()
-        {
-            try
-            {
-                var popularAnimalTypes = _context.Kinds
-                    .Select(type => new KindRating
-                    {
-                        Name = type.KindName,
-                        Count = _context.Patients.Count(p => p.kind_id == type.kind_id)
-                    })
-                    .OrderByDescending(info => info.Count)
-                    .ToList();
-
-                return Ok(popularAnimalTypes);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while loading kinds rating");
-                return StatusCode(500, ex.Message);
-            }
         }
 
         // POST: /add-patient

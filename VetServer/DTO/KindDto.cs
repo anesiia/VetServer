@@ -5,7 +5,7 @@ namespace VetServer.DTO
 {
     public class KindDto
     {
-        public int KindId { get; set; }
+        public int kind_id { get; set; }
         public string KindName { get; set; }
     }
 }

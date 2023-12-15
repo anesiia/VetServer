@@ -54,21 +54,6 @@ namespace VetServer.Controllers
 
                 return Ok("New pet owner registration was successful");
 
-                /*
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState); 
-                    
-
-                }
-                var hashedPassword = _passwordHasher.HashPassword(model, model.Password);
-                model.Password = hashedPassword;
-
-                _context.Owners.Add(model);
-                await _context.SaveChangesAsync();
-
-                return Ok("User registration successful");*/
-
             }
             catch (Exception ex)
             {

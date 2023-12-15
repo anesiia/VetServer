@@ -311,33 +311,7 @@ namespace VetServer.Controllers
             }
         }
 
-        [HttpGet("year-consultations-per-month")]
-        public IActionResult GetYearConsultationsPerMonth()
-        {
-            try
-            {
-                DateTime currentDate = DateTime.Now;
-                DateTime firstDayOfCurrentYear = new DateTime(currentDate.Year, 1, 1);
-
-                var consultationsPerMonth = _context.Appointments
-                    .Where(c => c.AppointmentDate >= firstDayOfCurrentYear).AsEnumerable()
-                    .GroupBy(c => new { c.AppointmentDate.Year, c.AppointmentDate.Month })
-                    .Select(group => new AppointmentsYearStatistics
-                    {
-                        Month = $"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(group.Key.Month)} {group.Key.Year}",
-                        ConsultationCount = group.Count()
-                    })
-                    .OrderBy(group => group.Month)
-                    .ToList();
-
-                return Ok(consultationsPerMonth);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while fetching consultations per month");
-                return StatusCode(500, ex.Message);
-            }
-        }
+        
 
     }
 }
