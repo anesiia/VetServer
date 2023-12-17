@@ -26,7 +26,7 @@ namespace VetServer.Controllers
             _logger = logger;
         }
 
-        // GET: /all-drugs
+        // GET: api/Drugs/all-drugs
         [HttpGet("all-drugs")]
         public async Task<IActionResult> GetDrugs()
         {
@@ -48,7 +48,7 @@ namespace VetServer.Controllers
             
         }
 
-        // GET: Drugs/drug-details/5
+        // GET: api/Drugs/drug-details/5
         [HttpGet("drug-details/{id}")]
         public async Task<IActionResult> GetDrugInfo(int id)
         {
@@ -77,7 +77,7 @@ namespace VetServer.Controllers
 
         }
 
-        // PUT: /update-drug-amount/5
+        // PUT: api/Drugs/update-drug-amount/5
         [HttpPut("update-drug-amount/{id}")]
         public async Task<IActionResult> UpdateDrugAmount(EditDrugAmount model)
         {
@@ -102,7 +102,7 @@ namespace VetServer.Controllers
             }
         }
 
-        // POST: /add-new-drug
+        // POST: api/Drugs/add-new-drug
         [HttpPost("add-new-drug")]
         public async Task<IActionResult> AddDrug(AddDrugs model)
         {
@@ -138,7 +138,7 @@ namespace VetServer.Controllers
             }
         }
 
-        // Delete: /delete-drug/5
+        // Delete: api/Drugs/delete-drug/5
         [HttpDelete("delete-drug/{id}")]
         public async Task<IActionResult> DeleteDrug(int id)
         {

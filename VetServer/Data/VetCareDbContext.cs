@@ -15,13 +15,5 @@ namespace VetServer.Data
         public DbSet<Kinds> Kinds { get; set; }
         public DbSet<Cages> Cages { get; set; }
 
-
-
-        //public DbSet<Doctors> DoctorLoginModel { get; set; }
-        //public DbSet<Owners> OwnerLoginModel { get; set; }
-        //public DbSet<Doctors> DoctorRegistration { get; set; }
-        //public DbSet<Owners> OwnerRegistration { get; set; }
-
-
     }
 }

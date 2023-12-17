@@ -6,13 +6,16 @@ namespace VetServer.Models
     public class AddPatient
     {
         [Required]
-        public string Name { get; set; }
+        [StringLength(50, MinimumLength = 3)]
+        public string? Name { get; set; }
 
         [Required]
+        [Range(1, 50)]
         public int Age { get; set; }
 
         [Required]
-        public string Sex { get; set; }
+        [StringLength(1, MinimumLength = 1)]
+        public string? Sex { get; set; }
 
         [Required]
         public int owner_id { get; set; }

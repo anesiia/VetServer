@@ -22,27 +22,17 @@ namespace VetServer.Controllers
             _logger = logger;
         }
 
-        // GET: /all-cages
+        // GET: api/Cages/all-cages
         [HttpGet("all-cages")]
         public IActionResult GetAllCages()
         {
-            /*try
-            {
-                var allCages = _context.Cages.ToList();
-                return Ok(allCages);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while fetching all cages");
-                return StatusCode(500, ex.Message);
-            }*/
             try
             {
                 var allCages = _context.Cages
                     .Select(c => new
                     {
                         c.CageId,
-                        CageTemperature = (double)c.CageTemperature, // Приводим к float
+                        CageTemperature = (double)c.CageTemperature,
                         CageOxygen = (double)c.CageOxygen,
                         c.patient_id
                     })
@@ -57,14 +47,14 @@ namespace VetServer.Controllers
             }
         }
 
-        // GET: /average-temperature
+        // GET: api/Cages/average-temperature
         [HttpGet("average-temperature")]
         public IActionResult GetAverageTemperature()
         {
             try
             {
                 var averageTemperature = _context.Cages
-                    .Where(c => c.CageTemperature.HasValue) // фильтрация, если есть неопределенные значения
+                    .Where(c => c.CageTemperature.HasValue)
                     .Average(c => c.CageTemperature);
 
                 return Ok(averageTemperature);
@@ -76,14 +66,14 @@ namespace VetServer.Controllers
             }
         }
 
-        // GET: /average-oxygen
+        // GET: api/Cages/average-oxygen
         [HttpGet("average-oxygen")]
         public IActionResult GetAverageOxygen()
         {
             try
             {
                 var averageOxygen = _context.Cages
-                    .Where(c => c.CageOxygen.HasValue) // фильтрация, если есть неопределенные значения
+                    .Where(c => c.CageOxygen.HasValue)
                     .Average(c => c.CageOxygen);
 
                 return Ok(averageOxygen);
@@ -94,6 +84,5 @@ namespace VetServer.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
     }
 }

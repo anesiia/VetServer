@@ -7,6 +7,7 @@ using VetServer.Models.Database;
 
 namespace VetServer.Controllers
 {
+    // api/Patietns
     [Route("api/[controller]")]
     [ApiController]
     public class PatientsController : ControllerBase
@@ -20,7 +21,7 @@ namespace VetServer.Controllers
             _logger = logger;
         }
 
-        // POST: /add-patient
+        // POST: api/Patietns/add-patient
         [HttpPost("add-patient")]
         public IActionResult AddPatient([FromBody] AddPatient model)
         {
@@ -43,7 +44,6 @@ namespace VetServer.Controllers
                     return BadRequest("Animal type with the specified ID does not exist");
                 }
 
-                // Создание нового пациента
                 var newPatient = new Patients
                 {
                     PatientName = model.Name,
@@ -53,7 +53,6 @@ namespace VetServer.Controllers
                     PatientSex = model.Sex
                 };
 
-                // Добавление пациента в базу данных
                 _context.Patients.Add(newPatient);
                 _context.SaveChanges();
 
@@ -66,7 +65,7 @@ namespace VetServer.Controllers
             }
         }
 
-        // DELETE /delete-patient/5
+        // DELETE api/Patietns/delete-patient/5
         [HttpDelete("delete-patient/{patientId}")]
         public IActionResult DeletePatient(int patientId)
         {

@@ -21,7 +21,7 @@ namespace VetServer.Controllers
         {
             _context = context;
             _passwordHasher = passwordHasher;
-            _logger = logger; // ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger;
         }
 
         // POST: /api/Owners/register
@@ -53,7 +53,6 @@ namespace VetServer.Controllers
                 await _context.SaveChangesAsync();
 
                 return Ok("New pet owner registration was successful");
-
             }
             catch (Exception ex)
             {
@@ -143,7 +142,6 @@ namespace VetServer.Controllers
                 _logger.LogError(ex, "An error occurred during appointment info loading");
                 return StatusCode(500, ex.Message);
             }
-
         }
 
         // PUT: /api/Owners/update-personal-info/5
@@ -172,10 +170,5 @@ namespace VetServer.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
-        
-
-
-
     }
 }

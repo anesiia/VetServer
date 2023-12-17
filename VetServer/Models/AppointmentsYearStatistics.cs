@@ -2,7 +2,7 @@
 {
     public class AppointmentsYearStatistics
     {
-        public string Month { get; set; }
+        public string? Month { get; set; }
         public int ConsultationCount { get; set; }
     }
 }

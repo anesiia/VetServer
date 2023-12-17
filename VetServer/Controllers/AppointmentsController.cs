@@ -1,24 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VetServer.Data;
 using VetServer.DTO;
 using VetServer.Models;
 using VetServer.Models.Database;
-
-//GetAppointmentInfo
-//UpdateAppointmentInfo
-//GetDoctorAppointmentsNextWeek
-//GetDoctorAppointments
-//GetOwnerAppointments
-//GetPastOwnerAppointments
-//GetFutureOwnerAppointments
 
 namespace VetServer.Controllers
 {
@@ -36,9 +21,7 @@ namespace VetServer.Controllers
             _logger = logger;
         }
 
-        
-
-        // GET: Appointments/GetVisitDetails/5
+        // GET: api/Appointments/appointment-details/5
         [HttpGet("appointment-details/{id}")]
         public async Task<IActionResult> GetAppointmentInfo(int id)
         {
@@ -59,7 +42,6 @@ namespace VetServer.Controllers
                     patient_id = appointment.patient_id,
                     AppointmentDiagnose = appointment.AppointmentDiagnose,
                     AppointmentInfo = appointment.AppointmentInfo
-
                 };
 
                 return Ok(appointmentDto);
@@ -71,34 +53,8 @@ namespace VetServer.Controllers
             }
             
         }
-        /*
 
-        [HttpPut("update-appointment/{id}")]
-        public async Task<IActionResult> UpdateAppointmentInfo(int id, string diagnose, string info)
-        {
-            try
-            {
-                var appointment = await _context.Appointments.FindAsync(id);
-                if (appointment == null)
-                {
-                    return NotFound("There is no visit with the provided ID.");
-                }
-
-                appointment.AppointmentDiagnose = diagnose;
-                appointment.AppointmentInfo = info;
-
-                _context.Update(appointment);
-                await _context.SaveChangesAsync();
-
-                return Ok("Visit details updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred during appointment updating");
-                return StatusCode(500, ex.Message);
-            }
-        }*/
-
+        // PUT: api/Appointments/update-appointment/5
         [HttpPut("update-appointment/{id}")]
         public async Task<IActionResult> UpdateAppointmentInfo(EditAppointment model)
         {
@@ -125,7 +81,95 @@ namespace VetServer.Controllers
             }
         }
 
+        // GET: api/Appointments/pet-owner-appointments/{ownerId}
+        [HttpGet("pet-owner-appointments/{ownerId}")]
+        public async Task<ActionResult<IEnumerable<Appointments>>> GetOwnerAppointments(int ownerId)
+        {
+            try
+            {
+                var appointments = await _context.Appointments
+                    .Join(_context.Patients,
+                        appointment => appointment.patient_id,
+                        patient => patient.PatientId,
+                        (appointment, patient) => new { Appointment = appointment, Patient = patient })
+                    .Join(_context.Owners,
+                        combined => combined.Patient.owner_id,
+                        owner => owner.owner_id,
+                        (combined, owner) => new { combined.Appointment, combined.Patient, Owner = owner })
+                    .Where(combined => combined.Owner.owner_id == ownerId)
+                    .Select(combined => combined.Appointment)
+                    .ToListAsync();
 
+                return Ok(appointments);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during pet owner appointments loading");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        // GET: api/Appointments/pet-owner-old-appointments/5
+        [HttpGet("pet-owner-old-appointments/{ownerId}")]
+        public async Task<ActionResult<IEnumerable<Appointments>>> GetPastOwnerAppointments(int ownerId)
+        {
+            try
+            {
+                var today = DateTime.Today;
+
+                var appointments = await _context.Appointments
+                    .Join(_context.Patients,
+                        appointment => appointment.patient_id,
+                        patient => patient.PatientId,
+                        (appointment, patient) => new { Appointment = appointment, Patient = patient })
+                    .Join(_context.Owners,
+                        combined => combined.Patient.owner_id,
+                        owner => owner.owner_id,
+                        (combined, owner) => new { combined.Appointment, combined.Patient, Owner = owner })
+                    .Where(combined => combined.Owner.owner_id == ownerId && combined.Appointment.AppointmentDate < today)
+                    .Select(combined => combined.Appointment)
+                    .ToListAsync();
+
+                return Ok(appointments);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during PAST pet owner appointments loading");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        // GET: api/Appointments/pet-owner-future-appointments/5
+        [HttpGet("pet-owner-future-appointments/{ownerId}")]
+        public async Task<ActionResult<IEnumerable<Appointments>>> GetFutureOwnerAppointments(int ownerId)
+        {
+            try
+            {
+                var today = DateTime.Today;
+
+                var appointments = await _context.Appointments
+                    .Join(_context.Patients,
+                        appointment => appointment.patient_id,
+                        patient => patient.PatientId,
+                        (appointment, patient) => new { Appointment = appointment, Patient = patient })
+                    .Join(_context.Owners,
+                        combined => combined.Patient.owner_id,
+                        owner => owner.owner_id,
+                        (combined, owner) => new { combined.Appointment, combined.Patient, Owner = owner })
+                    .Where(combined => combined.Owner.owner_id == ownerId && combined.Appointment.AppointmentDate >= today)
+                    .Select(combined => combined.Appointment)
+                    .ToListAsync();
+
+                return Ok(appointments);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during FUTURE pet owner appointments loading");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        // GET: api/Appointmnets/doctor-week-schedule/5
         [HttpGet("doctor-week-schedule/{doctorId}")]
         public async Task<IActionResult> GetDoctorAppointmentsNextWeek(int doctorId)
         {
@@ -157,7 +201,7 @@ namespace VetServer.Controllers
             }
         }
 
-        // GET: /GetDoctorAppointments/5
+        // GET: api/Appoitnments/doctor-all-appointments/5
         [HttpGet("doctor-all-appointments/{doctorId}")]
         public async Task<IActionResult> GetDoctorAppointments(int doctorId)
         {
@@ -193,7 +237,6 @@ namespace VetServer.Controllers
         {
             try
             {
-                // Получаем все времена консультаций для доктора на указанную дату
                 var doctorAppointmentsTime = _context.Appointments
                     .Where(a => a.doctor_id == doctorId && a.AppointmentDate.Date == date.Date)
                     .Select(a => a.AppointmentTime)
@@ -208,101 +251,8 @@ namespace VetServer.Controllers
             }
         }
 
-
-        // GET: api/Appointments/GetOwnerAppointments/{ownerId}
-        [HttpGet("pet-owner-appointments/{ownerId}")]
-        public async Task<ActionResult<IEnumerable<Appointments>>> GetOwnerAppointments(int ownerId)
-        {
-            try
-            {
-                var appointments = await _context.Appointments
-                    .Join(_context.Patients,
-                        appointment => appointment.patient_id,
-                        patient => patient.PatientId,
-                        (appointment, patient) => new { Appointment = appointment, Patient = patient })
-                    .Join(_context.Owners,
-                        combined => combined.Patient.owner_id,
-                        owner => owner.owner_id,
-                        (combined, owner) => new { combined.Appointment, combined.Patient, Owner = owner })
-                    .Where(combined => combined.Owner.owner_id == ownerId)
-                    .Select(combined => combined.Appointment)
-                    .ToListAsync();
-
-                return Ok(appointments);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred during pet owner appointments loading");
-                return StatusCode(500, ex.Message);
-            }
-
-        }
-
-        // GET: api/Appointments/GetPastOwnerAppointments/{ownerId}
-        [HttpGet("pet-owner-old-appointments/{ownerId}")]
-        public async Task<ActionResult<IEnumerable<Appointments>>> GetPastOwnerAppointments(int ownerId)
-        {
-            try
-            {
-                var today = DateTime.Today;
-
-                var appointments = await _context.Appointments
-                    .Join(_context.Patients,
-                        appointment => appointment.patient_id,
-                        patient => patient.PatientId,
-                        (appointment, patient) => new { Appointment = appointment, Patient = patient })
-                    .Join(_context.Owners,
-                        combined => combined.Patient.owner_id,
-                        owner => owner.owner_id,
-                        (combined, owner) => new { combined.Appointment, combined.Patient, Owner = owner })
-                    .Where(combined => combined.Owner.owner_id == ownerId && combined.Appointment.AppointmentDate < today)
-                    .Select(combined => combined.Appointment)
-                    .ToListAsync();
-
-                return Ok(appointments);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred during PAST pet owner appointments loading");
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-
-        // GET: api/Appointments/GetFutureOwnerAppointments/{ownerId}
-        [HttpGet("pet-owner-future-appointments/{ownerId}")]
-        public async Task<ActionResult<IEnumerable<Appointments>>> GetFutureOwnerAppointments(int ownerId)
-        {
-            try
-            {
-                var today = DateTime.Today;
-
-                var appointments = await _context.Appointments
-                    .Join(_context.Patients,
-                        appointment => appointment.patient_id,
-                        patient => patient.PatientId,
-                        (appointment, patient) => new { Appointment = appointment, Patient = patient })
-                    .Join(_context.Owners,
-                        combined => combined.Patient.owner_id,
-                        owner => owner.owner_id,
-                        (combined, owner) => new { combined.Appointment, combined.Patient, Owner = owner })
-                    .Where(combined => combined.Owner.owner_id == ownerId && combined.Appointment.AppointmentDate >= today)
-                    .Select(combined => combined.Appointment)
-                    .ToListAsync();
-
-                return Ok(appointments);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred during FUTURE pet owner appointments loading");
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-
-        // POST: Appointment/create-appointment
+        // POST: api/Appointment/create-appointment
         [HttpPost("create-appointment")]
-        //[ValidateAntiForgeryToken]
         public async Task<ActionResult> MakeNewAppointment( DateTime appointmentDate, TimeOnly appointmentTime, int doctorId, int patientId)
         {
             try
@@ -358,16 +308,5 @@ namespace VetServer.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
-        
-
-
-
-
-
-
-
-
-
     }
 }

@@ -7,7 +7,7 @@ namespace VetServer.DTO
     {
         public int DrugId { get; set; }
 
-        public string DrugName { get; set; }
+        public string? DrugName { get; set; }
 
         public int DrugQuantity { get; set; }
 

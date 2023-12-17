@@ -6,167 +6,167 @@ using VetServer.DTO;
 using VetServer.Models;
 using VetServer.Models.Database;
 
-
-namespace VetServer.Controllers;
-
-// api/Doctors
-[ApiController]
-[Route("api/[controller]")]
-public class DoctorsController : ControllerBase
+namespace VetServer.Controllers
 {
-    private readonly VetCareDbContext _context;
-    private readonly ILogger<DoctorsController> _logger;
-    private readonly IPasswordHasher<Doctors> _passwordHasher;
-
-    public DoctorsController(VetCareDbContext context, ILogger<DoctorsController> logger, IPasswordHasher<Doctors> passwordHasher)
+    // api/Doctors
+    [ApiController]
+    [Route("api/[controller]")]
+    public class DoctorsController : ControllerBase
     {
-        _context = context;
-        _logger = logger;
-        _passwordHasher = passwordHasher;
+        private readonly VetCareDbContext _context;
+        private readonly ILogger<DoctorsController> _logger;
+        private readonly IPasswordHasher<Doctors> _passwordHasher;
+
+        public DoctorsController(VetCareDbContext context, ILogger<DoctorsController> logger, IPasswordHasher<Doctors> passwordHasher)
+        {
+            _context = context;
+            _logger = logger;
+            _passwordHasher = passwordHasher;
+        }
+
+        // GET: api/Doctors/all-doctors
+        [HttpGet("all-doctors")]
+        public async Task<IActionResult> GetDoctors()
+        {
+            var doctors = _context.Doctors
+                .OrderBy(d => d.DoctorName)
+                .Select(d => new DoctorDto
+                {
+                    DoctorId = d.DoctorId,
+                    DoctorName = d.DoctorName,
+                    DoctorEmail = d.DoctorEmail,
+                    DoctorPhone = d.DoctorPhone
+                }).ToList();
+            return Ok(doctors);
+        }
+
+        // POST: api/Doctors/register
+        [HttpPost("add-new-doctor")]
+        public async Task<ActionResult> AddDoctor(DoctorRegistration model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                if (await _context.Doctors.AnyAsync(d => d.DoctorEmail == model.Email))
+                {
+                    return BadRequest("Doctor with such email already exists");
+                }
+
+                var newDoctor = new Doctors
+                {
+                    DoctorName = model.Name,
+                    DoctorEmail = model.Email,
+                    DoctorPhone = model.Phone,
+                    DoctorAddress = model.Address,
+                };
+
+                newDoctor.DoctorPassHash = _passwordHasher.HashPassword(newDoctor, model.Password);
+
+                await _context.Doctors.AddAsync(newDoctor);
+                await _context.SaveChangesAsync();
+
+                return Ok("Doctor registration was successful");
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during doctor register");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        // POST: api/Doctors/login
+        [HttpPost("login")]
+        public async Task<IActionResult> DoctorLogin(DoctorLoginModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.DoctorEmail == model.Email);
+
+                if (doctor == null)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(doctor, doctor.DoctorPassHash, model.PassHash);
+
+                if (passwordVerificationResult != PasswordVerificationResult.Success)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                return Ok(doctor);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during login");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        // DELETE: api/Doctors/delete-doctor/5
+        [HttpDelete("delete-doctor/{id}")]
+        public IActionResult DeleteDoctor(int id)
+        {
+            try
+            {
+                var doctorToDelete = _context.Doctors.Find(id);
+
+                if (doctorToDelete == null)
+                {
+                    return NotFound($"Doctor with ID {id} not found");
+                }
+
+                _context.Doctors.Remove(doctorToDelete);
+                _context.SaveChanges();
+
+                return Ok($"Doctor with ID {id} deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while deleting doctor with ID {id}");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        // PUT: api/Doctors/update-doctor-info/5
+        [HttpPut("update-doctor-info/{id}")]
+        public IActionResult UpdateDoctor(int id, [FromBody] EditDoctor model)
+        {
+            try
+            {
+                var doctorToUpdate = _context.Doctors.Find(id);
+
+                if (doctorToUpdate == null)
+                {
+                    return NotFound($"Doctor with ID {id} not found");
+                }
+
+                doctorToUpdate.DoctorName = model.Name;
+                doctorToUpdate.DoctorEmail = model.Email;
+                doctorToUpdate.DoctorPhone = model.Phone;
+                doctorToUpdate.DoctorAddress = model.Address;
+                doctorToUpdate.IsAdmin = model.IsAdmin;
+
+                _context.SaveChanges();
+
+                return Ok($"Doctor with ID {id} updated successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while updating doctor with ID {id}");
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
-
-    // GET: /all-doctors
-    [HttpGet("all-doctors")]
-    public async Task<IActionResult> GetDoctors()
-    {
-        var doctors = _context.Doctors
-            .OrderBy(d => d.DoctorName)
-            .Select(d => new DoctorDto
-        {
-            DoctorId = d.DoctorId,
-            DoctorName = d.DoctorName,
-            DoctorEmail = d.DoctorEmail,
-            DoctorPhone = d.DoctorPhone
-        }).ToList();
-        return Ok(doctors);
-    }
-
-    // POST: /register
-    [HttpPost("add-new-doctor")]
-    public async Task<ActionResult> AddDoctor(DoctorRegistration model)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (await _context.Doctors.AnyAsync(d => d.DoctorEmail == model.Email))
-            {
-                return BadRequest("Doctor with such email already exists");
-            }
-
-            var newDoctor = new Doctors
-            {
-                DoctorName = model.Name,
-                DoctorEmail = model.Email,
-                DoctorPhone = model.Phone,
-                DoctorAddress = model.Address,
-            };
-
-            newDoctor.DoctorPassHash = _passwordHasher.HashPassword(newDoctor, model.Password);
-
-            await _context.Doctors.AddAsync(newDoctor);
-            await _context.SaveChangesAsync();
-
-            return Ok("Doctor registration was successful");
-
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occurred during doctor register");
-            return StatusCode(500, ex.Message);
-        }
-    }
-
-    // POST: /login
-    [HttpPost("login")]
-    public async Task<IActionResult> DoctorLogin([FromBody] DoctorLoginModel model)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.DoctorEmail == model.Email);
-
-            if (doctor == null)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(doctor, doctor.DoctorPassHash, model.PassHash);
-
-            if (passwordVerificationResult != PasswordVerificationResult.Success)
-            {
-                return BadRequest(ModelState);
-            }
-
-            return Ok(doctor);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occurred during login");
-            return StatusCode(500, ex.Message);
-        }
-    }
-
-    // DELETE: /delete-doctor/5
-    [HttpDelete("delete-doctor/{id}")]
-    public IActionResult DeleteDoctor(int id)
-    {
-        try
-        {
-            var doctorToDelete = _context.Doctors.Find(id);
-
-            if (doctorToDelete == null)
-            {
-                return NotFound($"Doctor with ID {id} not found");
-            }
-
-            _context.Doctors.Remove(doctorToDelete);
-            _context.SaveChanges();
-
-            return Ok($"Doctor with ID {id} deleted successfully");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"An error occurred while deleting doctor with ID {id}");
-            return StatusCode(500, ex.Message);
-        }
-    }
-
-    // PUT: /update-doctor-info/5
-    [HttpPut("update-doctor-info/{id}")]
-    public IActionResult UpdateDoctor(int id, [FromBody] EditDoctor model)
-    {
-        try
-        {
-            var doctorToUpdate = _context.Doctors.Find(id);
-
-            if (doctorToUpdate == null)
-            {
-                return NotFound($"Doctor with ID {id} not found");
-            }
-
-            doctorToUpdate.DoctorName = model.Name;
-            doctorToUpdate.DoctorEmail = model.Email;
-            doctorToUpdate.DoctorPhone = model.Phone;
-            doctorToUpdate.DoctorAddress = model.Address;
-            doctorToUpdate.IsAdmin = model.IsAdmin;
-
-            _context.SaveChanges();
-
-            return Ok($"Doctor with ID {id} updated successfully");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"An error occurred while updating doctor with ID {id}");
-            return StatusCode(500, ex.Message);
-        }
-    }
-
 }
+

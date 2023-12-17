@@ -8,6 +8,7 @@ using VetServer.Models;
 using VetServer.Models.Database;
 namespace VetServer.Controllers
 {
+    // api/Statistics
     [Route("api/[controller]")]
     [ApiController]
     public class StatisticsController : ControllerBase
@@ -21,7 +22,7 @@ namespace VetServer.Controllers
             _logger = logger;
         }
 
-        // GET: /popular-animal-kinds
+        // GET: api/Statistics/popular-animal-kinds
         [HttpGet("popular-animal-kinds")]
         public IActionResult GetPopularAnimalKinds()
         {
@@ -45,6 +46,7 @@ namespace VetServer.Controllers
             }
         }
 
+        // GET: api/Statistics/year-consultations-per-month
         [HttpGet("year-consultations-per-month")]
         public IActionResult GetYearConsultationsPerMonth()
         {
@@ -63,16 +65,16 @@ namespace VetServer.Controllers
                     })
                     .OrderBy(group => group.Month)
                     .ToList();
-
                 return Ok(consultationsPerMonth);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while fetching consultations per month");
+                _logger.LogError(ex, "An error occurred while loading year consultations per month");
                 return StatusCode(500, ex.Message);
             }
         }
 
+        // GET: api/Statistics/top-workers
         [HttpGet("top-workers")]
         public IActionResult GetDoctorsStatistic()
         {
@@ -96,6 +98,7 @@ namespace VetServer.Controllers
             }
         }
 
+        // GET: api/Statistics/top-workers-in-month
         [HttpGet("top-workers-in-month")]
         public IActionResult GetDoctorsStatisticByMonth()
         {
@@ -119,10 +122,9 @@ namespace VetServer.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while fetching doctor consultation info for the last month");
+                _logger.LogError(ex, "An error occurred while loading top workers in month");
                 return StatusCode(500, ex.Message);
             }
         }
-
     }
 }

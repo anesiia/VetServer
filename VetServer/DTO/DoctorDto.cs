@@ -5,9 +5,6 @@ namespace VetServer.DTO
 {
     public class DoctorDto
     {
-       /* [Required]
-        [StringLength(30, MinimumLength = 2)]
-        public string Lastname { set; get; } = string.Empty;*/
         public int DoctorId { get; set; }
         public string? DoctorName { get; set; }
 

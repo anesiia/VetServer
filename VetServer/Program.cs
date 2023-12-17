@@ -8,7 +8,7 @@ using VetServer.Models.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<VetCareDbContext>(options =>
     options.UseSqlServer("Server=Anesia;Database=VetCare_db;Trusted_Connection=True;TrustServerCertificate=True;"));
@@ -31,14 +31,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddLogging();
 
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+
+// Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -52,11 +52,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Doctor}/{action=Login}/{id?}");

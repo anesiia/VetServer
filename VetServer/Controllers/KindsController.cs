@@ -5,10 +5,9 @@ using VetServer.DTO;
 using VetServer.Models;
 using VetServer.Models.Database;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace VetServer.Controllers
 {
+    // api/Kinds
     [Route("api/[controller]")]
     [ApiController]
     public class KindsController : ControllerBase
@@ -22,7 +21,7 @@ namespace VetServer.Controllers
             _logger = logger;
         }
 
-        // GET: /all-drugs
+        // GET: api/Kinds/all-kinds
         [HttpGet("all-kinds")]
         public async Task<IActionResult> GetKinds()
         {
@@ -40,8 +39,6 @@ namespace VetServer.Controllers
                 _logger.LogError(ex, "An error occurred during all kinds of animals loading");
                 return StatusCode(500, ex.Message);
             }
-
         }
-
     }
 }

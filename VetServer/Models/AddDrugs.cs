@@ -6,7 +6,8 @@ namespace VetServer.Models
     public class AddDrugs
     {
         [Required]
-        public string Name { get; set; }
+        [StringLength(50, MinimumLength = 3)]
+        public string? Name { get; set; }
         [Required]
         public int Quantity { get; set; }
     }
