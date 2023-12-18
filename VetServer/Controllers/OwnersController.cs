@@ -146,11 +146,11 @@ namespace VetServer.Controllers
 
         // PUT: /api/Owners/update-personal-info/5
         [HttpPut("update-personal-info/{id}")]
-        public async Task<IActionResult> UpdateOwnerInfo(EditOwner model)
+        public async Task<IActionResult> UpdateOwnerInfo(int id, EditOwner model)
         {
             try
             {
-                var owner = await _context.Owners.FindAsync(model.Id);
+                var owner = await _context.Owners.FindAsync(id);
                 if (owner == null)
                 {
                     return NotFound("There is no owner with the provided ID.");

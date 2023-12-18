@@ -79,11 +79,11 @@ namespace VetServer.Controllers
 
         // PUT: api/Drugs/update-drug-amount/5
         [HttpPut("update-drug-amount/{id}")]
-        public async Task<IActionResult> UpdateDrugAmount(EditDrugAmount model)
+        public async Task<IActionResult> UpdateDrugAmount(int id, EditDrugAmount model)
         {
             try
             {
-                var drug = await _context.Drugs.FindAsync(model.Id);
+                var drug = await _context.Drugs.FindAsync(id);
                 if (drug == null)
                 {
                     return NotFound("There is no drug with the provided ID");

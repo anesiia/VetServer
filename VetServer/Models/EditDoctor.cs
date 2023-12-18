@@ -5,7 +5,6 @@ namespace VetServer.Models
 {
     public class EditDoctor
     {
-        public int Id { get; set; }
         public string? Name { get; set; }
         public decimal? Phone { get; set; }
         public string? Email { get; set; }

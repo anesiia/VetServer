@@ -56,11 +56,11 @@ namespace VetServer.Controllers
 
         // PUT: api/Appointments/update-appointment/5
         [HttpPut("update-appointment/{id}")]
-        public async Task<IActionResult> UpdateAppointmentInfo(EditAppointment model)
+        public async Task<IActionResult> UpdateAppointmentInfo(int id, EditAppointment model)
         {
             try
             {
-                var appointment = await _context.Appointments.FindAsync(model.Id);
+                var appointment = await _context.Appointments.FindAsync(id);
                 if (appointment == null)
                 {
                     return NotFound("There is no visit with the provided ID.");

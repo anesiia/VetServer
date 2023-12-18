@@ -20,7 +20,6 @@ builder.Services.AddDbContext<VetCareDbContext>(options =>
 builder.Services.AddScoped<IPasswordHasher<Owners>, PasswordHasher<Owners>>();
 builder.Services.AddScoped<IPasswordHasher<Doctors>, PasswordHasher<Doctors>>();
 
-
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("CultureInvariant");
@@ -33,15 +32,12 @@ builder.Services.AddLogging();
 
 var app = builder.Build();
 
-
-
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
 
 if (app.Environment.IsDevelopment())
 {

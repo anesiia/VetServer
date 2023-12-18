@@ -5,7 +5,6 @@ namespace VetServer.Models
 {
     public class EditDrugAmount
     {
-        public int Id { get; set; }
 
         public int Quantity { get; set; }
     }
