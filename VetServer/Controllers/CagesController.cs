@@ -84,5 +84,31 @@ namespace VetServer.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        // PUT: api/Cages/update-animal-in-cage
+        [HttpPut("update-animal-in-cage/{cageId}-{patientId}")]
+        public IActionResult UpdateAnimalInCage(int cageId, int patientId)
+        {
+            try
+            {
+                var cage = _context.Cages.Find(cageId);
+
+                if (cage == null)
+                {
+                    return NotFound($"Cage with ID {cageId} not found");
+                }
+
+                cage.patient_id = patientId;
+
+                _context.SaveChanges();
+
+                return Ok($"Animal in cage {cageId} updated successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating animal in cage");
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
