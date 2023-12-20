@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.SqlServer.Management.Smo.Wmi;
 using System.Globalization;
 using VetServer.Data;
 using VetServer.Models.Database;
@@ -20,9 +21,22 @@ builder.Services.AddDbContext<VetCareDbContext>(options =>
 builder.Services.AddScoped<IPasswordHasher<Owners>, PasswordHasher<Owners>>();
 builder.Services.AddScoped<IPasswordHasher<Doctors>, PasswordHasher<Doctors>>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", builder =>
+    {
+        builder.WithOrigins("https://localhost:7223")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .SetIsOriginAllowed(_ => true)
+            .AllowCredentials();
+    });
+});
+
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("CultureInvariant");
+
 });
 
 builder.Services.AddControllers();
@@ -49,9 +63,12 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCors("AllowSpecificOrigin");
 app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Doctor}/{action=Login}/{id?}");
 
 app.Run();
+
+
