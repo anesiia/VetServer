@@ -169,7 +169,7 @@ namespace VetServer.Controllers
             }
         }
 
-        // GET: api/Appointmnets/doctor-week-schedule/5
+        // GET: api/Appointments/doctor-week-schedule/5
         [HttpGet("doctor-week-schedule/{doctorId}")]
         public async Task<IActionResult> GetDoctorAppointmentsNextWeek(int doctorId)
         {

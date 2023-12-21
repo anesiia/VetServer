@@ -40,6 +40,39 @@ namespace VetServer.Controllers
             return Ok(doctors);
         }
 
+        // GET: api/Doctors/doctor-details/5
+        [HttpGet("doctor-details/{id}")]
+        public async Task<IActionResult> GetDoctorInfo(int id)
+        {
+            try
+            {
+                var doctor = await _context.Doctors.FindAsync(id);
+
+                if (doctor == null)
+                {
+                    return NotFound("there is no doctor");
+                }
+                var doctorDto = new DoctorDto
+                {
+                    DoctorId = doctor.DoctorId,
+                    DoctorName = doctor.DoctorName,
+                    DoctorPhone = doctor.DoctorPhone,
+                    DoctorEmail = doctor.DoctorEmail,
+                    DoctorAddress = doctor.DoctorAddress,
+                    IsAdmin = doctor.IsAdmin
+
+                };
+
+                return Ok(doctorDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during doctor info loading");
+                return StatusCode(500, ex.Message);
+            }
+
+        }
+
         // POST: api/Doctors/register
         [HttpPost("add-new-doctor")]
         public async Task<ActionResult> AddDoctor(DoctorRegistration model)

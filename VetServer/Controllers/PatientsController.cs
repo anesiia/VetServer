@@ -21,6 +21,22 @@ namespace VetServer.Controllers
             _logger = logger;
         }
 
+        // GET: api/Patients/all-patients
+        [HttpGet("all-patients")]
+        public async Task<IActionResult> GetPatients()
+        {
+            var patients = _context.Patients
+                .OrderBy(p => p.PatientName)
+                .Select(p => new PatientDto
+                {
+                    PatientId = p.PatientId,
+                    PatientName = p.PatientName,
+                    PatientSex = p.PatientSex,
+                    PatientAge = p.PatientAge
+                }).ToList();
+            return Ok(patients);
+        }
+
         // POST: api/Patietns/add-patient
         [HttpPost("add-patient")]
         public IActionResult AddPatient([FromBody] AddPatient model)
