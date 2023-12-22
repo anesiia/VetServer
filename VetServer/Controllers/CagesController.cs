@@ -98,7 +98,7 @@ namespace VetServer.Controllers
                     return NotFound($"Cage with ID {cageId} not found");
                 }
 
-                cage.patient_id = patientId;
+                cage.patient_id = (int)patientId;
 
                 _context.SaveChanges();
 

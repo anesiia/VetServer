@@ -81,6 +81,37 @@ namespace VetServer.Controllers
             }
         }
 
+        // PUT: api/Appointments/update-full-appointment/5
+        [HttpPut("update-full-appointment/{id}")]
+        public async Task<IActionResult> UpdateFullAppointmentInfo(int id, EditFullAppointment model)
+        {
+            try
+            {
+                var appointment = await _context.Appointments.FindAsync(id);
+                if (appointment == null)
+                {
+                    return NotFound("There is no visit with the provided ID.");
+                }
+
+                appointment.AppointmentTime = model.AppointmentTime;
+                appointment.AppointmentDate = model.AppointmentDate;
+                appointment.patient_id = model.patient_id;
+                appointment.doctor_id = model.doctor_id;
+                appointment.AppointmentDiagnose = model.AppointmentDiagnose;
+                appointment.AppointmentInfo = model.AppointmentInfo;
+
+                _context.Update(appointment);
+                await _context.SaveChangesAsync();
+
+                return Ok("Visit details updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during appointment updating");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         // GET: api/Appointments/pet-owner-appointments/{ownerId}
         [HttpGet("pet-owner-appointments/{ownerId}")]
         public async Task<ActionResult<IEnumerable<Appointments>>> GetOwnerAppointments(int ownerId)
