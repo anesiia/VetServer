@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using VetServer.Data;
 using VetServer.DTO;
 using VetServer.Models;
 using VetServer.Models.Database;
+using System.Data;
 
 namespace VetServer.Controllers
 {
@@ -307,6 +309,31 @@ namespace VetServer.Controllers
                 await _context.SaveChangesAsync();
                 return Ok("Appointment was succesfully created");
 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during creating NEW appointment");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        // POST: api/Appointments/create-appointment-by-procedure
+        [HttpPost("create-appointment-by-procedure")]
+        public async Task<ActionResult> AddAppointment([FromBody] AddAppointmentDto model)
+        {
+            try
+            {
+                var appointmentDateParam = new SqlParameter("@AppointmentDate", model.AppointmentDate);
+                var appointmentTimeParam = new SqlParameter("@AppointmentTime", model.AppointmentTime);
+                var doctorIdParam = new SqlParameter("@DoctorId", model.doctor_id);
+                var patientIdParam = new SqlParameter("@PatientId", model.patient_id);
+                var diagnoseParam = new SqlParameter("@Diagnose", model.AppointmentDiagnose ?? (object)DBNull.Value);
+                var infoParam = new SqlParameter("@Info", model.AppointmentInfo ?? (object)DBNull.Value);
+
+                await _context.Database.ExecuteSqlRawAsync("EXEC AddAppointment @AppointmentDate, @AppointmentTime, @DoctorId, @PatientId, @Diagnose, @Info",
+                     appointmentDateParam, appointmentTimeParam, doctorIdParam, patientIdParam, diagnoseParam, infoParam);
+
+                return Ok("Appointment was successfully created");
             }
             catch (Exception ex)
             {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using VetServer.Data;
 using VetServer.DTO;
@@ -167,6 +168,27 @@ namespace VetServer.Controllers
             }
             catch (Exception ex)
             {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        // GET: api/Owners/owner-patients/{ownerId}
+        [HttpGet("owner-patients/{ownerId}")]
+        public async Task<IActionResult> GetPatientsByOwner(int ownerId)
+        {
+            try
+            {
+                var ownerIdParam = new SqlParameter("@OwnerId", ownerId);
+
+                var ownersPatients = await _context.OwnersPatients
+                    .FromSqlRaw("SELECT * FROM dbo.GetPatientsByOwner(@OwnerId)", ownerIdParam)
+                    .ToListAsync();
+
+                return Ok(ownersPatients);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching the patients by owner");
                 return StatusCode(500, ex.Message);
             }
         }

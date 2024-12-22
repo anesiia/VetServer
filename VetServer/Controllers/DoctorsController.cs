@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using VetServer.Data;
 using VetServer.DTO;
@@ -199,6 +200,22 @@ namespace VetServer.Controllers
                 _logger.LogError(ex, $"An error occurred while updating doctor with ID {id}");
                 return StatusCode(500, ex.Message);
             }
+        }
+
+        // GET: api/Appointments/CountByDoctorAndDate
+        [HttpGet("CountByDoctorAndDate")]
+        public ActionResult<int> GetAppointmentCountByDoctorAndDate(int doctorId, DateTime appointmentDate)
+        {
+            var doctorIdParam = new SqlParameter("@doctor_id", doctorId);
+            var appointmentDateParam = new SqlParameter("@appointment_date", appointmentDate.Date);
+
+            var sql = "SELECT dbo.GetAppointmentCountByDoctorAndDate(@doctor_id, @appointment_date)";
+            var count = _context.AppointmentCount.FromSqlRaw(sql, doctorIdParam, appointmentDateParam).AsEnumerable().FirstOrDefault();
+
+
+            Console.WriteLine($"Returned count: {count.Counte}");
+
+            return (int)count.Counte;
         }
     }
 }
